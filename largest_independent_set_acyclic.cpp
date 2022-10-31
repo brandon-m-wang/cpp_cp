@@ -26,8 +26,29 @@
 
 using namespace std;
 
+int lisaNumerical(vector<vector<int>> &network, int person, vector<int> &memo) {
+    if (memo[person] != -1) {
+        return memo[person];
+    }
+    int lisaChildren = 0;
+    int lisaGrandchildren = 1;
+    vector<int> grandchildren;
+    for (int child : network[person]) {
+        lisaChildren += lisaNumerical(network, child, memo);
+        for (int grandchild : network[child]) {
+            lisaGrandchildren += lisaNumerical(network, grandchild, memo);
+        }
+    }
+
+    memo[person] = max(lisaChildren, lisaGrandchildren);
+    return memo[person];
+}
+
 // Numerical size value of the largest party only
-int lisaNumerical(vector<vector<int>> &network) {}
+int lisaNumerical(vector<vector<int>> &network) {
+    vector<int> memo(network.size(), -1);
+    return lisaNumerical(network, 0, memo);
+}
 
 vector<int> lisa(vector<vector<int>> &network, int person,
                  unordered_map<int, vector<int>> &memo) {
@@ -41,7 +62,9 @@ vector<int> lisa(vector<vector<int>> &network, int person,
             lisaChildren.push_back(lisaChild);
         }
         for (int grandchild : network[child]) {
-            lisaGrandchildren.push_back(grandchild);
+            for (int lisaGrandchild : lisa(network, grandchild, memo)) {
+                lisaGrandchildren.push_back(lisaGrandchild);
+            }
         }
     }
     if (lisaChildren.size() > lisaGrandchildren.size()) {
@@ -62,23 +85,23 @@ vector<int> lisa(vector<vector<int>> &network) {
 }
 
 int main() {
-    vector<vector<int>> network = {
-        {1, 2, 3, 4, 9}, {5, 6}, {6, 7}, {7, 8}, {}, {}, {}, {}, {}, {}};
+    vector<vector<int>> network = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9}, {10},
+                                   {11},   {},     {},     {},     {},  {}};
     for (int person : lisa(network)) {
         cout << person << " ";
     }
     cout << "\n";
+    cout << lisaNumerical(network) << "\n";
     return 0;
 }
 
 /*
  * Analysis:
  *
- * Where V is the number of persons and E is the number of known connections.
- * Time complexity - O(V)
- * Space complexity - O(E)
+ * Where V is the number of persons and E is the number of known
+ * connections. Time complexity - O(V) Space complexity - O(E)
  *
- * Here, we only need to check each node for it's LIS once, and subsequent LIS
- * calculations for that node is memoized. Therefore our time complexity is O(V)
- * which is the number of persons in our input.
+ * Here, we only need to check each node for it's LIS once, and subsequent
+ * LIS calculations for that node is memoized. Therefore our time complexity
+ * is O(V) which is the number of persons in our input.
  */
