@@ -19,7 +19,7 @@
  *
  * Output:
  *
- * vector<int> -> the largest possible party
+ * vector<int> -> the largest possible party.
  */
 
 using namespace std;
